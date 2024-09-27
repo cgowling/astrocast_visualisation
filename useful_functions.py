@@ -37,7 +37,7 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
         VCI3M_forecast[-11:] - errors,
         VCI3M_forecast[-11:] + errors,
         lw=3,
-        label="Forecast VCI3M",
+        label="Forecast VCI3M uncertainty",
         color="blue",
         alpha=0.45,
         zorder=4,
@@ -49,7 +49,7 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
     )
 
     ax.plot(
-        dates_forecast, VCI3M_forecast, linestyle="dashed", lw=3, color="black", label=""
+        dates_forecast, VCI3M_forecast, linestyle="dotted", lw=3, color="black", label="Forecast VCI3M"
     )
 
     ax.vlines(
