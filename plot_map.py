@@ -2,7 +2,7 @@ import geopandas as gpd
 import numpy as np
 import matplotlib as mp
 import matplotlib.pyplot as plt
-from matplotlib_scalebar.scalebar import ScaleBar
+# from matplotlib_scalebar.scalebar import ScaleBar
 
 bounds = [0, 0.00001, 10, 20, 35, 50, 100]
 cmap = mp.colors.ListedColormap(
