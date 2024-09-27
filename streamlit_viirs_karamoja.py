@@ -50,7 +50,7 @@ with cola:
 # LOAD SELECTED DATA
 # ________________________________________
 
-hdf_path = f"/Users/cg411/Documents/PASSAGE/projects/streamlit_vis/passage_clusters/{DATA_SOURCE}/{selected_cluster}/FinalSubCountyVCI_{selected_cluster}.h5"
+hdf_path = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/FinalSubCountyVCI_{selected_cluster}.h5"
 hdf_file_viirs = h5.File(hdf_path, "r")
 
 viirs_datasets = list(hdf_file_viirs.keys())
@@ -85,13 +85,13 @@ with colb:
 col1, col2, col3 = st.columns(3)
 
 if selected_cluster == "CLUSTER_1":
-    shapefile_path = "/Users/cg411/Documents/PASSAGE/projects/astrocast_pipeline/shapefiles/IGAD_Cluster_123/IGAD_Cluster_1.shp"
+    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_1.shp"
     LEVEL_3_LABEL = "County"
 elif selected_cluster == "CLUSTER_2":
-    shapefile_path = "/Users/cg411/Documents/PASSAGE/projects/astrocast_pipeline/shapefiles/IGAD_Cluster_123/IGAD_Cluster_2.shp"
+    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_2.shp"
     LEVEL_3_LABEL = "WOREDANAME"
 else:
-    shapefile_path = "/Users/cg411/Documents/PASSAGE/projects/astrocast_pipeline/shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp"
+    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp"
     LEVEL_3_LABEL ="DISTRICT"
 
 # ________________________________________
