@@ -114,7 +114,7 @@ st.subheader("Forecasted VCI3M", divider='gray')
 # ________________________________________
 errors = uf.get_error(DATA_SOURCE,selected_cluster,selected_coulum)
 
-df_forecasts = pd.read_excel(f"passage_clusters/{DATA_SOURCE}/{selected_cluster}/VCI3M_Overview_2024-09-01.xlsx") # HARDCODED!!!!!
+df_forecasts = pd.read_excel(f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/VCI3M_Overview_2024-09-01.xlsx") # HARDCODED!!!!!
 df_forecasts_T = df_forecasts.set_index('Unnamed: 0').T
 
 dates_forecast = list(df_forecasts_T[selected_coulum].index)
