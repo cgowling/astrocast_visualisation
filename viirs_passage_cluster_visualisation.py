@@ -11,25 +11,26 @@ import useful_functions as uf
 # TITLE
 # ________________________________________
 
+
+# st.image("passage_logo_1_cluster_green_green.png",width = 150)
+
+
+colal, mid, colbe = st.columns([15,1,50])
+with colal:
+    st.image("passage_logo_1_cluster_green_green.png", width=140)
+with colbe:
+    st.header('VCI3M, NDVI Monitoring & Forecasting',divider='gray')
+
+# # :earth_africa: VCI3M, NDVI Monitoring & Forecasting
 '''
-# :earth_africa: VCI3M, NDVI Monitoring & Forecasting
 This tool shows historical and forecasted 3-month average vegetation condition index (VCI3M) and the historical Normalized Difference Vegetation Index (NDVI) generated from VIIRS data across PASSAGE's regions of interest.
 PASSAGE focuses on 3 of IGAD's cross boundary clusters  (1:Karamoja, 2:Moyale, 3:Mandera)*. To view relevant data, select the cluster and subcounty you are interested in from the drop down menus below. 
 
 Note: This tool is for demonstrative purposes only and is under active development. 
 '''
-# st.image("passage_logo_1_cluster_green_green.png",width = 150)
-
-
-# colal, mid, colbe = st.columns([15,1,50])
-# with colal:
-#     st.image("passage_logo_1_cluster_green_green.png", width=140)
-# with colbe:
-#     st.header('VCI3M, NDVI Monitoring & Forecasting',divider='gray')
-
 # st.divider()
 # st.image("passage_logo_1_cluster_green_green.png",width = 100) #caption="Sunrise by the mountains"
-st.logo("passage_logo_1_cluster_green_green.png",)
+# st.logo("passage_logo_1_cluster_green_green.png",)
 
 # ________________________________________
 # Select Cluster
