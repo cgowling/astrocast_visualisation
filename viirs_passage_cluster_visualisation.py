@@ -65,16 +65,17 @@ last_observed_VCI3M = {}
 for i, dataset in enumerate(viirs_datasets):
     final_subcounty_array_viirs = np.array(hdf_file_viirs[viirs_datasets[i]] , dtype=float)
     last_observed_VCI3M[dataset] = final_subcounty_array_viirs[-1, 3]
-    df[dataset] = final_subcounty_array_viirs[:, 3]
-    df_NDVI[dataset] = final_subcounty_array_viirs[:, 1]
+    df[dataset] = final_subcounty_array_viirs[12:, 3]
+    df_NDVI[dataset] = final_subcounty_array_viirs[12:, 1]
     if i==0:
-        time = final_subcounty_array_viirs[:, 0]
+        time = final_subcounty_array_viirs[12:, 0]
         dates = np.array([datetime.datetime(int(float(str(date)[:4])), 1, 1) + datetime.timedelta(
             int(float(str(date)[4:7])) - 1) if date > 0 else float("NaN") for date in time])
         min_date = dates[0]
         max_date = dates[-1]
         print(max_date)
-        df = df.set_index(dates)
+        df["Date"] = dates
+        df = df.set_index("Date")
         df_NDVI = df_NDVI.set_index(dates)
 
 # ________________________________________
@@ -180,7 +181,9 @@ st.pyplot(fig2)
 # Display VCI3M dataframe
 # ________________________________________
 st.subheader("Historical weekly VCI3M dataframe for all regions ", divider='gray')
+
 st.dataframe(filtered_df)
+
 
 # ________________________________________
 # Display historical NDVI
