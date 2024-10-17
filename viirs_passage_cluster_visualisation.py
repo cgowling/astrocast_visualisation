@@ -17,7 +17,7 @@ import useful_functions as uf
 
 colal, mid, colbe = st.columns([15,1,50])
 with colal:
-    st.image("passage_logo_1_cluster_green_green.png", width=140)
+    st.image("PASSAGE_final_logo.png", width=140)
 with colbe:
     st.header('VCI3M, NDVI Monitoring & Forecasting',divider='gray')
 
