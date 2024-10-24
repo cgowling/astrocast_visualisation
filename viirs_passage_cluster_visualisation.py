@@ -85,6 +85,28 @@ for i, dataset in enumerate(viirs_datasets):
         df = df.set_index("Date")
         df_NDVI = df_NDVI.set_index(dates)
 
+hdf_path_smoothed_VCI3M = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/smoothed_historical_VCI_{selected_cluster}.h5"
+hdf_file_smoothed_VCI3M = h5.File(hdf_path_smoothed_VCI3M, "r")
+
+df_vci_smoothed =  pd.DataFrame()
+df_vci3m_smoothed =  pd.DataFrame()
+for i, dataset in enumerate(viirs_datasets):
+    final_VCI_array = np.array(hdf_file_smoothed_VCI3M[viirs_datasets[i]] , dtype=float)
+
+    df_vci_smoothed[dataset] = final_VCI_array[12:, 1]
+    df_vci3m_smoothed[dataset] = final_VCI_array[12:, 2]
+    if i==0:
+        time = final_VCI_array[12:, 0]
+        dates = np.array([datetime.datetime(int(float(str(date)[:4])), 1, 1) + datetime.timedelta(
+            int(float(str(date)[4:7])) - 1) if date > 0 else float("NaN") for date in time])
+        min_date = dates[0]
+        max_date = dates[-1]
+        print(max_date)
+        df_vci_smoothed["Date"] = dates
+        df_vci_smoothed = df_vci_smoothed.set_index("Date")
+        df_vci3m_smoothed = df_vci3m_smoothed.set_index(dates)
+
+
 # ________________________________________
 # Select sub county
 # ________________________________________
@@ -132,7 +154,7 @@ df_forecasts_T = df_forecasts.set_index('Unnamed: 0').T
 dates_forecast = list(df_forecasts_T[selected_coulum].index)
 VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
 
-VCI3M = list(df[selected_coulum].values)
+VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
 
 # ________________________________________
 # Create figures showing forecasted VCI3M
