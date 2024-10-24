@@ -39,6 +39,7 @@ Note: This tool is for demonstrative purposes only and is under active developme
 # SELECT WHICH CLUSTER
 DATA_SOURCE = "VIIRS"
 # LEVEL_3_LABEL =""
+clusters = ['Karamoja', "Moyale", "Mandera"]
 clusters = ['CLUSTER_1', "CLUSTER_2", "CLUSTER_3"]
 
 # Create columns
@@ -46,13 +47,19 @@ cola, colb,  = st.columns(2)
 
 with cola:
 
-    selected_cluster = st.selectbox("IGAD Cluster", clusters)
+    selected_cluster_name = st.selectbox("IGAD Cluster", clusters)
 
 
 
 # ________________________________________
 # LOAD SELECTED DATA
 # ________________________________________
+
+cluster_labels = {'Karamoja': 'CLUSTER_1',
+                  "Moyale": "CLUSTER_2",
+                  "Mandera": "CLUSTER_3"}
+
+selected_cluster = cluster_labels[selected_cluster_name]
 
 hdf_path = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/FinalSubCountyVCI_{selected_cluster}.h5"
 hdf_file_viirs = h5.File(hdf_path, "r")
