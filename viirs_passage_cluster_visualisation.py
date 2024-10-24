@@ -40,7 +40,7 @@ Note: This tool is for demonstrative purposes only and is under active developme
 DATA_SOURCE = "VIIRS"
 # LEVEL_3_LABEL =""
 clusters = ['Karamoja', "Moyale", "Mandera"]
-clusters = ['CLUSTER_1', "CLUSTER_2", "CLUSTER_3"]
+# clusters = ['CLUSTER_1', "CLUSTER_2", "CLUSTER_3"]
 
 # Create columns
 cola, colb,  = st.columns(2)
