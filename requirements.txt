@@ -7,3 +7,4 @@ datetime
 seaborn
 geopandas
 openpyxl
+folium

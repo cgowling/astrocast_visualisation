@@ -4,31 +4,15 @@ import  h5py as h5
 import matplotlib.pyplot as plt
 from datetime import timedelta
 import matplotlib.dates as mdates
-
+import streamlit as st
+import pandas as pd
+import datetime
+import geopandas as gpd
+import folium
 DATA_SOURCE = "VIIRS"
 LEVEL_1_NAME = "CLUSTER_1"
 
 
-def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
-    errors = np.empty(11, dtype=float)
-
-    hindcast_dir = os.path.join("passage_clusters",DATA_SOURCE,LEVEL_1_NAME,  f"hindcasts_{LEVEL_1_NAME}.h5")
-    # if (hindcast_dir != ""):
-    #     hindcast_dir = os.path.join(hindcast_dir, f"hindcasts_{LEVEL_1_NAME}.h5")
-    # else:
-    #     hindcast_dir = f"hindcasts_{LEVEL_1_NAME}.h5"
-    # print(f"Opening Hindcast file {hindcast_dir}")
-    hindcast_file = h5.File((hindcast_dir), "r")
-    # print(self.dataset)
-    dataset_array = np.array(hindcast_file[dataset], dtype=float)
-    dataset_array[dataset_array == 0] = np.nan
-    errors[0] = 0
-
-    for jump_ahead in range(1, 11):
-        errors[jump_ahead] = np.nanstd(
-            dataset_array[:, 3] - dataset_array[:, jump_ahead + 3]
-        )
-    return errors
 
 def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date, dataset):
     fig, ax = plt.subplots(figsize=(14, 7))
@@ -98,5 +82,156 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
     ax.tick_params(axis="y", labelsize=12)
     ax.xaxis.set_major_formatter(fmt_xdata)
     return fig, ax
+
+
+
+
+@st.cache_data
+def load_observed_data(DATA_SOURCE,selected_cluster):
+
+    hdf_path = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/FinalSubCountyVCI_{selected_cluster}.h5"
+    hdf_file = h5.File(hdf_path, "r")
+
+    datasets = list(hdf_file.keys())
+
+
+    df = pd.DataFrame()
+    df_NDVI = pd.DataFrame()
+    last_observed_VCI3M = {}
+    for i, dataset in enumerate(datasets):
+        final_subcounty_array = np.array(hdf_file[datasets[i]] , dtype=float)
+        last_observed_VCI3M[dataset] = final_subcounty_array[-1, 3]
+        df[dataset] = final_subcounty_array[12:, 3]
+        df_NDVI[dataset] = final_subcounty_array[12:, 1]
+        if i==0:
+            time = final_subcounty_array[12:, 0]
+            dates = np.array([datetime.datetime(int(float(str(date)[:4])), 1, 1) + datetime.timedelta(
+                int(float(str(date)[4:7])) - 1) if date > 0 else float("NaN") for date in time])
+            min_date = dates[0]
+            max_date = dates[-1]
+            # print(max_date)
+            df["Date"] = dates
+            df = df.set_index("Date")
+            df_NDVI["Date"] = dates
+            df_NDVI =  df_NDVI.set_index("Date")
+    return datasets, df, df_NDVI, last_observed_VCI3M,  min_date , max_date, dates
+
+
+
+@st.cache_data
+def load_smoothed_data(DATA_SOURCE, selected_cluster, datasets):
+
+    hdf_path_smoothed_VCI3M = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/smoothed_historical_VCI_{selected_cluster}.h5"
+    hdf_file_smoothed_VCI3M = h5.File(hdf_path_smoothed_VCI3M, "r")
+    smoothed_datasets = list(hdf_file_smoothed_VCI3M.keys())
+    df_vci_smoothed = pd.DataFrame()
+    df_vci3m_smoothed =  pd.DataFrame()
+    for i, dataset in enumerate(datasets):
+        final_VCI_array = np.array(hdf_file_smoothed_VCI3M[datasets[i]], dtype=float)
+
+        df_vci_smoothed[dataset] = final_VCI_array[12:, 1]
+        df_vci3m_smoothed[dataset] = final_VCI_array[12:, 2]
+        if i==0:
+            time = final_VCI_array[12:, 0]
+            dates = np.array([datetime.datetime(int(float(str(date)[:4])), 1, 1) + datetime.timedelta(
+                int(float(str(date)[4:7])) - 1) if date > 0 else float("NaN") for date in time])
+            min_date = dates[0]
+            max_date = dates[-1]
+            # print(max_date)
+            df_vci_smoothed["Date"] = dates
+            df_vci_smoothed = df_vci_smoothed.set_index("Date")
+            df_vci3m_smoothed = df_vci3m_smoothed.set_index(dates)
+
+    return df_vci_smoothed, df_vci3m_smoothed
+
+
+@st.cache_data
+def load_forecasted_VCI3M(DATA_SOURCE, selected_cluster):
+    df_forecasts = pd.read_excel(
+        f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/VCI3M_Overview_2024-10-13.xlsx")  # HARDCODED!!!!!
+    df_forecasts_T = df_forecasts.set_index('Unnamed: 0').T
+
+    return df_forecasts_T
+
+
+@st.cache_data
+def add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,last_observed_VCI3M, datasets):
+
+    shapefile = gpd.read_file(shapefile_path)
+
+    map_VCI3M = np.full(len(shapefile), 0)
+
+    for i, dataset in enumerate(datasets):
+        map_VCI3M[
+                int(
+                    list(
+                        shapefile.loc[
+                            shapefile[LEVEL_3_LABEL] == dataset.replace("-", "/")
+                            ].index
+                    )[0]
+                )
+            ] = last_observed_VCI3M[dataset]
+
+
+    shapefile["VCI3M"] = map_VCI3M
+    return shapefile
+
+@st.cache_data
+def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
+    errors = np.empty(11, dtype=float)
+
+    hindcast_dir = os.path.join("passage_clusters",DATA_SOURCE,LEVEL_1_NAME,  f"hindcasts_{LEVEL_1_NAME}.h5")
+    # if (hindcast_dir != ""):@st.cache_data
+    #     hindcast_dir = os.path.join(hindcast_dir, f"hindcasts_{LEVEL_1_NAME}.h5")
+    # else:
+    #     hindcast_dir = f"hindcasts_{LEVEL_1_NAME}.h5"
+    # print(f"Opening Hindcast file {hindcast_dir}")
+    hindcast_file = h5.File((hindcast_dir), "r")
+    # print(self.dataset)
+    dataset_array = np.array(hindcast_file[dataset], dtype=float)
+    dataset_array[dataset_array == 0] = np.nan
+    errors[0] = 0
+
+    for jump_ahead in range(1, 11):
+        errors[jump_ahead] = np.nanstd(
+            dataset_array[:, 3] - dataset_array[:, jump_ahead + 3]
+        )
+    return errors
+
+
+@st.cache_data
+def create_base_map_passage_clusters():
+
+    m = folium.Map(location=(3.162455530237848, 37.61718750000001), zoom_start=6.2, tiles="cartodb positron")
+
+    shapefile_path_cluster_1 = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_1.shp"
+    LEVEL_3_LABEL_cluster_1 = "County"
+
+    shapefile_path_cluster_2 = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_2.shp"
+    LEVEL_3_LABEL_cluster_2 = "WOREDANAME"
+
+    shapefile_path_cluster_3 = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp"
+    LEVEL_3_LABEL_cluster_3 = "DISTRICT"
+
+    shapefile_paths = [shapefile_path_cluster_1,shapefile_path_cluster_2, shapefile_path_cluster_3]
+
+    level_3_labels = [LEVEL_3_LABEL_cluster_1,LEVEL_3_LABEL_cluster_2,LEVEL_3_LABEL_cluster_3]
+    for i, shapefile_p in enumerate(shapefile_paths):
+        level_3_label = level_3_labels[i]
+        shapefile = gpd.read_file(shapefile_p)
+        shapefile = shapefile.to_crs(epsg=4326)
+        for _, r in shapefile.iterrows():
+            # Without simplifying the representation of each borough,
+            # the map might not be displayed
+            sim_geo = gpd.GeoSeries(r["geometry"]).simplify(tolerance=0.001)
+            geo_j = sim_geo.to_json()
+            geo_j = folium.GeoJson(data=geo_j)# , style_function=lambda x: {"fillColor": colour}
+            folium.Popup(r[level_3_label]).add_to(geo_j)
+            geo_j.add_to(m)
+    return m
+
+
+
+
 
 
