@@ -16,224 +16,223 @@ import os
 import matplotlib as mp
 
 
-
-
-
-
 # Page configuration
 st.set_page_config(
-    page_title="PASSAGE Vegetation Condition Dashboard")
-    # layout="wide",
-    # initial_sidebar_state="expanded")
+    page_title="PASSAGE Vegetation Condition Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded")
+
+# st.sidebar.success("Select a regio above.")
+
+# pg = st.navigation([st.Page("2_Kenya.py")])
+# pg.run()
+
+
 
 # ________________________________________
 # TITLE
 # ________________________________________
 
-colal, mid, colbe = st.columns([50,1,15])
+colal,  colbe = st.columns([5, 40], vertical_alignment= 'center',  gap='small')
 with colal:
-    st.header('VCI3M, NDVI Monitoring & Forecasting')
+    st.image("PASSAGE_final_logo.png", width=200)
 with colbe:
-    st.image("PASSAGE_final_logo.png", width=140)
+    st.title('VCI3M, NDVI Monitoring & Forecasting')
+
 st.divider()
-# # :earth_africa: VCI3M, NDVI Monitoring & Forecasting
-'''
-This tool shows historical and forecasted 3-month average vegetation condition index (VCI3M) and the historical Normalized Difference Vegetation Index (NDVI) generated from VIIRS data across PASSAGE's regions of interest.
-PASSAGE focuses on 3 of IGAD's cross boundary clusters  (1:Karamoja, 2:Moyale, 3:Mandera)*. To view relevant data, select a cluster from the drop down menu below and click a sub county on the map to see a VCI3M forecast for that region.  
 
-Note: This tool is under active development. 
-'''
+col = st.columns((1, 2.5, 2), gap='medium')
 
-# ________________________________________
-# Select sub county
-# ________________________________________
+with col[0]:
+    # # :earth_africa: VCI3M, NDVI Monitoring & Forecasting
+    '''
+    This tool shows historical and forecasted 3-month average vegetation condition index (VCI3M) and the historical Normalized Difference Vegetation Index (NDVI) generated from VIIRS data across PASSAGE's regions of interest.
+    PASSAGE focuses on 3 of IGAD's cross boundary clusters  (1:Karamoja, 2:Moyale, 3:Mandera)*. To view relevant data, select a cluster from the drop down menu below and click a sub county on the map to see a VCI3M forecast for that region.  
+    
+    Note: This tool is under active development. 
+    '''
 
-DATA_SOURCE = "VIIRS"
-
-# SELECT WHICH CLUSTER
-
-clusters = ['Karamoja', "Moyale", "Mandera"]
-selected_cluster_name = st.selectbox("IGAD Cluster", clusters)
-
-# ______________________________________
-# LOAD SELECTED DATA
-# ________________________________________
-
-cluster_labels = {'Karamoja': 'CLUSTER_1',
-                  "Moyale": "CLUSTER_2",
-                  "Mandera": "CLUSTER_3"}
-
-selected_cluster = cluster_labels[selected_cluster_name]
-
-datasets, df, df_NDVI, last_observed_VCI3M, min_date, max_date, dates = uf.load_observed_data(DATA_SOURCE,
-                                                                                              selected_cluster)
-
-df_vci_smoothed, df_vci3m_smoothed = uf.load_smoothed_data(DATA_SOURCE, selected_cluster, datasets)
-
-if selected_cluster == "CLUSTER_1":
-    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_1.shp"
-    LEVEL_3_LABEL = "County"
-elif selected_cluster == "CLUSTER_2":
-    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_2.shp"
-    LEVEL_3_LABEL = "WOREDANAME"
-else:
-    shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp"
-    LEVEL_3_LABEL = "DISTRICT"
-
-# ________________________________________
-# Create map showing selected sub county
-# ________________________________________
-
-
-m = uf.create_base_map_passage_clusters()
-
-shapefile = uf.add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
-
-bounds = [0, 1, 10, 20, 35, 50, 100]
-
-#
-colormap = branca.colormap.LinearColormap(
-    # vmin=0,  # shapefile["VCI3M"].quantile(0.0),
-    # vmax=shapefile["VCI3M"].quantile(1),
-    colors=["red", "r", "orange", "yellow", "green", "darkgreen"],
-    caption="VCI3M",
-).to_step(index = bounds)
-
-# colormap = branca.colormap.LinearColormap.to_step(
-#     index = bounds,
-#     colors=["white", "r", "darkorange", "yellow", "limegreen", "darkgreen"],
-#     caption="VCI3M",
-# )
-#     vmin=0,  # shapefile["VCI3M"].quantile(0.0),
-#     vmax=shapefile["VCI3M"].quantile(1),
-
-# )
-
-
-
-# colormap = mp.colors.ListedColormap( ["white", "r", "darkorange", "yellow", "limegreen", "darkgreen"])
-#
-# norm = mp.colors.BoundaryNorm(bounds, colormap.N)
-tooltip = folium.GeoJsonTooltip(
-    fields=[LEVEL_3_LABEL, "VCI3M"],
-    aliases=["Sub county:", "Latest VCI3M:"],
-    localize=True,
-    sticky=False,
-    labels=True,
-    style="""
-        background-color: #F0EFEF;
-        border: 2px solid black;
-        border-radius: 3px;
-        box-shadow: 3px;
-    """,
-    max_width=800,
-)
-
-g = folium.GeoJson(
-    shapefile,
-    style_function=lambda x: {
-        "fillColor": colormap(x["properties"]["VCI3M"])
-        if x["properties"]["VCI3M"] is not None
-        else "transparent",
-        "color": "black",
-        "fillOpacity": 0.6,
-    },
-    tooltip=tooltip,
-    # popup=popup,
-).add_to(m)
-
-colormap.add_to(m)
-
-output = st_folium(m, width=700, height=500)
-
-# state_name = ''
-if output['last_active_drawing']:
-    selected_coulum = output["last_object_clicked_tooltip"].splitlines()[3].lstrip()
-    # st.write(selected_coulum)
-else:
-    selected_coulum = datasets[0]
-
-
-# if output["last_object_clicked_tooltip"] == None:
-#     pass
-# else :
-#     st.write(output["last_object_clicked_tooltip"])
-
-
-# ________________________________________
-# Sub title forecast VCI3M
-# ________________________________________
-st.subheader("Forecasted VCI3M", divider='gray')
-
-# ________________________________________
-# calculate errors from hindcasts for this subcounty
-# ________________________________________
-errors = uf.get_error(DATA_SOURCE, selected_cluster,selected_coulum)
-
-
-df_forecasts_T = uf.load_forecasted_VCI3M(DATA_SOURCE, selected_cluster)
-dates_forecast = list(df_forecasts_T[selected_coulum].index)
-VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
-
-historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
-# VCI3M = list(df[selected_coulum].values)
-
-# ________________________________________
-# # Create figures showing forecasted VCI3M
-# # ________________________________________
-fig3, ax3 = uf.plot_forecasts(dates, historical_smoothed_VCI3M, dates_forecast,VCI3M_forecast, errors, max_date, selected_coulum)
-
-st.pyplot(fig3)
-
-
-# # ________________________________________
-# # Slider to select time period
-# # ________________________________________
-from_date, to_date = st.slider(
-    'Which time period are you interested in?',
-    min_value= min_date,
-    max_value= max_date,
-    value=[min_date, max_date])
-
-
-# Filter the data
-filtered_df = df.loc[from_date:to_date]
-filtered_df_NDVI = df_NDVI.loc[from_date:to_date]
-
-
-
-# # ________________________________________
-# # Create figures showing historical VCI3M
-# # ________________________________________
-st.subheader("Historical weekly VCI3M ", divider='gray')
-tab1, tab2 = st.tabs(["Chart", "Data"])
-
-with tab1:
-    # streamlit line chart
-    # st.subheader("Historical weekly VCI3M ", divider='gray')
-    st.line_chart(filtered_df[selected_coulum], x_label="Date", y_label="VCI3M")
-with tab2:
+with col[1]:
+    st.header("Latest observed VCI3M  ", divider='gray')
+    st.write("Select sub county to see VCI3M forecast ")
     # ________________________________________
-    # Display VCI3M dataframe
+    # Select sub county
     # ________________________________________
-    # st.subheader("Historical weekly VCI3M dataframe for all regions ", divider='gray')
 
-    st.dataframe(filtered_df)
+    DATA_SOURCE = "VIIRS"
 
-# # ________________________________________
-# # Display historical NDVI
-# # ________________________________________
-st.subheader("Historical weekly NDVI", divider='gray')
-tab1_2, tab2_2 =  st.tabs(["Chart", "Data"])
-with tab1_2:
+    # SELECT WHICH CLUSTER
 
-    # streamlit line chart
-    st.line_chart(filtered_df_NDVI[selected_coulum], x_label="Date", y_label="NDVI")
+    clusters = ['Karamoja', "Moyale", "Mandera"]
+    selected_cluster_name = st.selectbox("IGAD Cluster", clusters)
 
-with tab2_2:
-    # st.subheader("Historical weekly NDVI all regions ", divider='gray')
-    # streamlit line chart
-    st.dataframe(filtered_df_NDVI)
+    # ______________________________________
+    # LOAD SELECTED DATA
+    # ________________________________________
+
+    cluster_labels = {'Karamoja': 'CLUSTER_1',
+                      "Moyale": "CLUSTER_2",
+                      "Mandera": "CLUSTER_3"}
+
+    selected_cluster = cluster_labels[selected_cluster_name]
+
+    datasets, df, df_NDVI, last_observed_VCI3M, min_date, max_date, dates = uf.load_observed_data(DATA_SOURCE,
+                                                                                                  selected_cluster)
+
+    df_vci_smoothed, df_vci3m_smoothed = uf.load_smoothed_data(DATA_SOURCE, selected_cluster, datasets)
+
+    if selected_cluster == "CLUSTER_1":
+        shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_1.shp"
+        LEVEL_3_LABEL = "County"
+    elif selected_cluster == "CLUSTER_2":
+        shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_2.shp"
+        LEVEL_3_LABEL = "WOREDANAME"
+    else:
+        shapefile_path = "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp"
+        LEVEL_3_LABEL = "DISTRICT"
+
+    # ________________________________________
+    # Create map showing selected sub county
+    # ________________________________________
+
+
+    m = uf.create_base_map_passage_clusters()
+
+    shapefile = uf.add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
+
+    bounds = [0, 1, 10, 20, 35, 50, 100]
+
+    #
+    colormap = branca.colormap.LinearColormap(
+        # vmin=0,  # shapefile["VCI3M"].quantile(0.0),
+        # vmax=shapefile["VCI3M"].quantile(1),
+        colors=["red", "r", "orange", "yellow", "green", "darkgreen"],
+        caption="VCI3M",
+    ).to_step(index = bounds)
+
+    tooltip = folium.GeoJsonTooltip(
+        fields=[LEVEL_3_LABEL, "VCI3M"],
+        aliases=["Sub county:", "Latest VCI3M:"],
+        localize=True,
+        sticky=False,
+        labels=True,
+        style="""
+            background-color: #F0EFEF;
+            border: 2px solid black;
+            border-radius: 3px;
+            box-shadow: 3px;
+        """,
+        max_width=800,
+    )
+
+    g = folium.GeoJson(
+        shapefile,
+        style_function=lambda x: {
+            "fillColor": colormap(x["properties"]["VCI3M"])
+            if x["properties"]["VCI3M"] is not None
+            else "transparent",
+            "color": "black",
+            "fillOpacity": 0.6,
+        },
+        tooltip=tooltip,
+        # popup=popup,
+    ).add_to(m)
+
+    colormap.add_to(m)
+
+    output = st_folium(m, width=700, height=500)
+
+    # state_name = ''
+    if output['last_active_drawing']:
+        selected_coulum = output["last_object_clicked_tooltip"].splitlines()[3].lstrip()
+        # st.write(selected_coulum)
+    else:
+        selected_coulum = datasets[0]
+
+
+    # if output["last_object_clicked_tooltip"] == None:
+    #     pass
+    # else :
+    #     st.write(output["last_object_clicked_tooltip"])
+
+
+    # ________________________________________
+    # Sub title forecast VCI3M
+    # ________________________________________
+    st.subheader("Forecasted VCI3M", divider='gray')
+
+    # ________________________________________
+    # calculate errors from hindcasts for this subcounty
+    # ________________________________________
+    errors = uf.get_error(DATA_SOURCE, selected_cluster,selected_coulum)
+
+
+    df_forecasts_T = uf.load_forecasted_VCI3M(DATA_SOURCE, selected_cluster)
+    dates_forecast = list(df_forecasts_T[selected_coulum].index)
+    VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
+
+    historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
+    # VCI3M = list(df[selected_coulum].values)
+
+    # ________________________________________
+    # # Create figures showing forecasted VCI3M
+    # # ________________________________________
+    fig3, ax3 = uf.plot_forecasts(dates, historical_smoothed_VCI3M, dates_forecast,VCI3M_forecast, errors, max_date, selected_coulum)
+
+    st.pyplot(fig3)
+
+with col[2]:
+    st.header(f"Historical data {selected_coulum} ", divider='gray')
+
+    # # ________________________________________
+    # # Slider to select time period
+    # # ________________________________________
+
+    from_date, to_date = st.slider(
+        'Which time period are you interested in?',
+        min_value= min_date,
+        max_value= max_date,
+        value=[min_date, max_date])
+
+
+    # Filter the data
+    filtered_df = df.loc[from_date:to_date]
+    filtered_df_NDVI = df_NDVI.loc[from_date:to_date]
+
+
+
+    # # ________________________________________
+    # # Create figures showing historical VCI3M
+    # # ________________________________________
+    st.subheader("Historical weekly VCI3M ", divider='gray')
+    tab1, tab2 = st.tabs(["Chart", "Data"])
+
+    with tab1:
+        # streamlit line chart
+        # st.subheader("Historical weekly VCI3M ", divider='gray')
+        st.line_chart(filtered_df[selected_coulum], x_label="Date", y_label="VCI3M")
+    with tab2:
+        # ________________________________________
+        # Display VCI3M dataframe
+        # ________________________________________
+        # st.subheader("Historical weekly VCI3M dataframe for all regions ", divider='gray')
+
+        st.dataframe(filtered_df)
+
+    # # ________________________________________
+    # # Display historical NDVI
+    # # ________________________________________
+    st.subheader("Historical weekly NDVI", divider='gray')
+    tab1_2, tab2_2 =  st.tabs(["Chart", "Data"])
+    with tab1_2:
+
+        # streamlit line chart
+        st.line_chart(filtered_df_NDVI[selected_coulum], x_label="Date", y_label="NDVI")
+
+    with tab2_2:
+        # st.subheader("Historical weekly NDVI all regions ", divider='gray')
+        # streamlit line chart
+        st.dataframe(filtered_df_NDVI)
 
 #
 #

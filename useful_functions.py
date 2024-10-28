@@ -12,6 +12,8 @@ import folium
 DATA_SOURCE = "VIIRS"
 LEVEL_1_NAME = "CLUSTER_1"
 
+# import sys
+# sys.path.append('./shapefiles')
 
 
 def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date, dataset):
@@ -92,7 +94,18 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
     hdf_path = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/FinalSubCountyVCI_{selected_cluster}.h5"
     hdf_file = h5.File(hdf_path, "r")
 
-    datasets = list(hdf_file.keys())
+    if selected_cluster == "Kenya":
+        datasets = ["Eldas", "Kieni", "Kitui Central", "Kitui East", "Kitui Rural", "Kitui South", "Kitui West",
+                       "Laisamis", "Loima", "Mathira", "Moyale", "Mukurweni", "Mwatate", "Mwingi East",
+                       "Mwingi North", "Mwingi West", "North Horr", "Nyeri Town", "Othaya", "Saku", "Samburu East",
+                       "Samburu North", "Samburu West", "Tarbaj", "Taveta", "Tetu", "Turkana Central",
+                       "Turkana East", "Turkana North", "Turkana South", "Turkana West", "Voi", "Wajir East",
+                       "Wajir North", "Wajir South", "Wajir West", "Wundanyi"]
+    else :
+        datasets = list(hdf_file.keys())
+
+
+
 
 
     df = pd.DataFrame()
@@ -123,7 +136,7 @@ def load_smoothed_data(DATA_SOURCE, selected_cluster, datasets):
 
     hdf_path_smoothed_VCI3M = f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/smoothed_historical_VCI_{selected_cluster}.h5"
     hdf_file_smoothed_VCI3M = h5.File(hdf_path_smoothed_VCI3M, "r")
-    smoothed_datasets = list(hdf_file_smoothed_VCI3M.keys())
+    # smoothed_datasets = list(hdf_file_smoothed_VCI3M.keys())
     df_vci_smoothed = pd.DataFrame()
     df_vci3m_smoothed =  pd.DataFrame()
     for i, dataset in enumerate(datasets):
@@ -160,6 +173,7 @@ def add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,last_obse
     shapefile = gpd.read_file(shapefile_path)
 
     map_VCI3M = np.full(len(shapefile), 0)
+
 
     for i, dataset in enumerate(datasets):
         map_VCI3M[
@@ -233,5 +247,25 @@ def create_base_map_passage_clusters():
 
 
 
+@st.cache_data
+def create_base_map_kenya():
+
+    m = folium.Map(location=(3.162455530237848, 37.61718750000001), zoom_start=6.2, tiles="cartodb positron")
+    shapefile_path = "./shapefiles/KEN_Adm2/KEN_Adm2.shp"
+    LEVEL_3_LABEL = "Adm2Name"
+
+
+    level_3_label = LEVEL_3_LABEL
+    shapefile = gpd.read_file(shapefile_path)
+    shapefile = shapefile.to_crs(epsg=4326)
+    for _, r in shapefile.iterrows():
+        # Without simplifying the representation of each borough,
+        # the map might not be displayed
+        sim_geo = gpd.GeoSeries(r["geometry"]).simplify(tolerance=0.001)
+        geo_j = sim_geo.to_json()
+        geo_j = folium.GeoJson(data=geo_j)# , style_function=lambda x: {"fillColor": colour}
+        folium.Popup(r[level_3_label]).add_to(geo_j)
+        geo_j.add_to(m)
+    return m
 
 
