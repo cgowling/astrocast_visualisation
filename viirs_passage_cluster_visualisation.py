@@ -13,7 +13,7 @@ import geopandas as gpd
 import branca
 from streamlit_folium import st_folium
 import os
-
+import matplotlib as mp
 
 
 
@@ -39,7 +39,7 @@ st.divider()
 # # :earth_africa: VCI3M, NDVI Monitoring & Forecasting
 '''
 This tool shows historical and forecasted 3-month average vegetation condition index (VCI3M) and the historical Normalized Difference Vegetation Index (NDVI) generated from VIIRS data across PASSAGE's regions of interest.
-PASSAGE focuses on 3 of IGAD's cross boundary clusters  (1:Karamoja, 2:Moyale, 3:Mandera)*. To view relevant data, select the cluster and subcounty you are interested in from the drop down menus below. 
+PASSAGE focuses on 3 of IGAD's cross boundary clusters  (1:Karamoja, 2:Moyale, 3:Mandera)*. To view relevant data, select a cluster from the drop down menu below and click a sub county on the map to see a VCI3M forecast for that region.  
 
 Note: This tool is under active development. 
 '''
@@ -89,13 +89,31 @@ m = uf.create_base_map_passage_clusters()
 
 shapefile = uf.add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
 
-colormap = branca.colormap.LinearColormap(
-    vmin=0,  # shapefile["VCI3M"].quantile(0.0),
-    vmax=shapefile["VCI3M"].quantile(1),
-    colors=["white", "r", "darkorange", "yellow", "limegreen", "darkgreen"],
-    caption="VCI3M",
-)
+bounds = [0, 1, 10, 20, 35, 50, 100]
 
+#
+colormap = branca.colormap.LinearColormap(
+    # vmin=0,  # shapefile["VCI3M"].quantile(0.0),
+    # vmax=shapefile["VCI3M"].quantile(1),
+    colors=["red", "r", "orange", "yellow", "green", "darkgreen"],
+    caption="VCI3M",
+).to_step(index = bounds)
+
+# colormap = branca.colormap.LinearColormap.to_step(
+#     index = bounds,
+#     colors=["white", "r", "darkorange", "yellow", "limegreen", "darkgreen"],
+#     caption="VCI3M",
+# )
+#     vmin=0,  # shapefile["VCI3M"].quantile(0.0),
+#     vmax=shapefile["VCI3M"].quantile(1),
+
+# )
+
+
+
+# colormap = mp.colors.ListedColormap( ["white", "r", "darkorange", "yellow", "limegreen", "darkgreen"])
+#
+# norm = mp.colors.BoundaryNorm(bounds, colormap.N)
 tooltip = folium.GeoJsonTooltip(
     fields=[LEVEL_3_LABEL, "VCI3M"],
     aliases=["Sub county:", "Latest VCI3M:"],
