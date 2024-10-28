@@ -8,3 +8,4 @@ seaborn
 geopandas
 openpyxl
 folium
+streamlit_folium
