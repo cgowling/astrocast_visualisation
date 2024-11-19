@@ -33,11 +33,11 @@ st.set_page_config(
 # TITLE
 # ________________________________________
 
-colal,  colbe = st.columns([10, 40], vertical_alignment= 'center',  gap="medium")
+colal,  colbe = st.columns([40, 20], vertical_alignment= "center",  gap="small")
 with colal:
-    st.image("PASSAGE_final_logo.png", width=200)
+    st.title('Vegetation Condition Monitoring & Forecasting')
 with colbe:
-    st.title('VCI3M, NDVI Monitoring & Forecasting')
+    st.image("PASSAGE CLARE horizontal EN .png", width=500)
 
 st.divider()
 
