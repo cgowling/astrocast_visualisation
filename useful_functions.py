@@ -161,7 +161,7 @@ def load_smoothed_data(DATA_SOURCE, selected_cluster, datasets):
 @st.cache_data
 def load_forecasted_VCI3M(DATA_SOURCE, selected_cluster):
     df_forecasts = pd.read_excel(
-        f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/VCI3M_Overview_2024-10-13.xlsx")  # HARDCODED!!!!!
+        f"./passage_clusters/{DATA_SOURCE}/{selected_cluster}/VCI3M_Forecast_Overview_{selected_cluster}.xlsx")  # HARDCODED!!!!!
     df_forecasts_T = df_forecasts.set_index('Unnamed: 0').T
 
     return df_forecasts_T
