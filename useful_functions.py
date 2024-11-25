@@ -16,7 +16,7 @@ LEVEL_1_NAME = "CLUSTER_1"
 # sys.path.append('./shapefiles')
 
 
-def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date, dataset):
+def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date, dataset, LEVEL_2_NAME= ""):
     fig, ax = plt.subplots(figsize=(14, 7))
     ax.fill_between(
         dates_forecast[-11:],
@@ -70,7 +70,7 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
     ax.axhspan(35, 50, alpha=0.5, color="limegreen")
     ax.axhspan(50, 300, alpha=0.5, color="darkgreen")
 
-    ax.set_title("VCI3M for {}".format(dataset), fontsize=20)
+    ax.set_title("VCI3M for {} {}".format(dataset, LEVEL_2_NAME), fontsize=20)
 
     # self.ax4.set_title(str(self.dataset) + ' VCI3M',fontsize=20)
 
@@ -95,12 +95,24 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
     hdf_file = h5.File(hdf_path, "r")
 
     if selected_cluster == "Kenya":
-        datasets = ["Eldas", "Kieni", "Kitui Central", "Kitui East", "Kitui Rural", "Kitui South", "Kitui West",
-                       "Laisamis", "Loima", "Mathira", "Moyale", "Mukurweni", "Mwatate", "Mwingi East",
-                       "Mwingi North", "Mwingi West", "North Horr", "Nyeri Town", "Othaya", "Saku", "Samburu East",
-                       "Samburu North", "Samburu West", "Tarbaj", "Taveta", "Tetu", "Turkana Central",
-                       "Turkana East", "Turkana North", "Turkana South", "Turkana West", "Voi", "Wajir East",
-                       "Wajir North", "Wajir South", "Wajir West", "Wundanyi"]
+        NDMA_pilot_counties  = ["Garissa", "Kilifi", "Makueni", "Mandera", "Marsabit", "Taita Taveta", "Turkana", "Wajir",
+                          "West Pokot"]
+        # mask = shapefile["Adm1Name"].isin(LEVEL_2_LABELs)
+        # filter_test = shapefile[mask]
+        # test_list = filter_test["Adm2Name"].to_list()
+        # NDMA_pilot_sub_counties
+        datasets = ['Voi', 'Mwatate', 'Wundanyi', 'Taveta', 'Rabai', 'Kilifi South', 'Kaloleni', 'Magarini', 'Malindi', 'Kilifi North',
+                                   'Ganze', 'Laisamis', 'Moyale', 'North Horr', 'Saku', 'Lafey', 'Mandera North', 'Banissa', 'Mandera West', 'Mandera South',
+                                   'Mandera East', 'Tarbaj', 'Wajir North', 'Wajir South', 'Wajir West', 'Balambala', 'Dujis', 'Ijara', 'Fafi', 'Lagdera', 'Dadaab',
+                                   'Eldas', 'Wajir East', 'Kacheliba', 'Pokot South', 'Sigor', 'Kapenguria', 'Turkana East', 'Turkana South', 'Loima', 'Turkana Central',
+                                   'Turkana West', 'Turkana North', 'Kibwezi East', 'Kibwezi West', 'Makueni', 'Kaiti', 'Kilome', 'Mbooni']
+
+        # datasets = ["Eldas", "Kieni", "Kitui Central", "Kitui East", "Kitui Rural", "Kitui South", "Kitui West",
+        #                "Laisamis", "Loima", "Mathira", "Moyale", "Mukurweni", "Mwatate", "Mwingi East",
+        #                "Mwingi North", "Mwingi West", "North Horr", "Nyeri Town", "Othaya", "Saku", "Samburu East",
+        #                "Samburu North", "Samburu West", "Tarbaj", "Taveta", "Tetu", "Turkana Central",
+        #                "Turkana East", "Turkana North", "Turkana South", "Turkana West", "Voi", "Wajir East",
+        #                "Wajir North", "Wajir South", "Wajir West", "Wundanyi"]
     else :
         datasets = list(hdf_file.keys())
 
@@ -168,7 +180,7 @@ def load_forecasted_VCI3M(DATA_SOURCE, selected_cluster):
 
 
 @st.cache_data
-def add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,last_observed_VCI3M, datasets):
+def add_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,VCI3M, datasets):
 
     shapefile = gpd.read_file(shapefile_path)
 
@@ -184,10 +196,34 @@ def add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,last_obse
                             ].index
                     )[0]
                 )
-            ] = last_observed_VCI3M[dataset]
+            ] = VCI3M[dataset]
 
 
     shapefile["VCI3M"] = map_VCI3M
+    return shapefile
+
+
+@st.cache_data
+def add_NDVI_to_shapefile(shapefile_path, LEVEL_3_LABEL,NDVI, datasets):
+
+    shapefile = gpd.read_file(shapefile_path)
+
+    map_NDVI = np.full(len(shapefile), 1.1)
+
+
+    for i, dataset in enumerate(datasets):
+        map_NDVI[
+                int(
+                    list(
+                        shapefile.loc[
+                            shapefile[LEVEL_3_LABEL] == dataset.replace("-", "/")
+                            ].index
+                    )[0]
+                )
+            ] = NDVI[dataset]
+
+
+    shapefile["NDVI"] = map_NDVI
     return shapefile
 
 @st.cache_data
@@ -250,7 +286,7 @@ def create_base_map_passage_clusters():
 @st.cache_data
 def create_base_map_kenya():
 
-    m = folium.Map(location=(3.162455530237848, 37.61718750000001), zoom_start=6.2, tiles="cartodb positron")
+    m = folium.Map(location=(0.4048951780498096, 37.67519396600542), zoom_start=6.2, tiles="cartodb positron")
     shapefile_path = "./shapefiles/KEN_Adm2/KEN_Adm2.shp"
     LEVEL_3_LABEL = "Adm2Name"
 
@@ -269,3 +305,10 @@ def create_base_map_kenya():
     return m
 
 
+
+# DATA_SOURCE = "VIIRS"
+# region = "Kenya"
+#
+# datasets, df, df_NDVI, last_observed_VCI3M, min_date, max_date, dates = load_observed_data(DATA_SOURCE,
+#                                                                                               region)
+#

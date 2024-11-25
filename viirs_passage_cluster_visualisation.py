@@ -20,11 +20,11 @@ import matplotlib as mp
 st.set_page_config(
     page_title="PASSAGE Vegetation Condition Dashboard",
     layout="wide",
-    initial_sidebar_state="collapsed")
+    initial_sidebar_state="expanded")
 
 # st.sidebar.success("Select a regio above.")
 
-# pg = st.navigation([st.Page("2_Kenya.py")])
+# pg = st.navigation([st.Page("2_NDMA_pilot_VCI3M_forecasts.py")])
 # pg.run()
 
 
@@ -53,6 +53,7 @@ Note: This tool is under active development.
 # Sub title forecast VCI3M
 # ________________________________________
 st.header("Forecasted VCI3M", divider='gray')
+
 
 
 
@@ -105,7 +106,7 @@ with col[0]:
 
     m = uf.create_base_map_passage_clusters()
 
-    shapefile = uf.add_last_observed_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
+    shapefile = uf.add_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
 
     bounds = [0, 1, 10, 20, 35, 50, 100]
 
