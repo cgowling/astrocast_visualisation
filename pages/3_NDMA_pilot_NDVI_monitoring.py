@@ -30,6 +30,25 @@ def convert_julian_doy_to_datetime(date):
     return datetime.datetime(int(str(date)[:4]), 1, 1) + datetime.timedelta(
         int(str(date)[4:7]) - 1)
 
+
+def plot_NDVI_shapefile_map(shapefile, LEVEL_3_LABEL):
+    fig, ax = plt.subplots(figsize=(2, 2))
+    fig.patch.set_facecolor("lightblue")
+
+    ax = shapefile.plot(
+        ax=ax,
+        column="NDVI",
+        cmap=cmap,
+        norm=norm,
+        legend=False,
+        edgecolor="Black",
+        label=shapefile[LEVEL_3_LABEL],
+    )
+
+    ax.axis("off")
+    return fig, ax
+
+
 DATA_SOURCE = "VIIRS"
 region = "Kenya"
 
@@ -110,22 +129,8 @@ with col_ndvi_monitoring[0]:
 with col_ndvi_monitoring[1]:
     st.write(f"NDVI aggregated to mean sub-scounty for week ending {jpg_date}")
     shapefile = uf.add_NDVI_to_shapefile(shapefile_path, LEVEL_3_LABEL, selected_NDVI, filtered_datasets)
-    fig, ax = plt.subplots(figsize=(2, 2))
-    fig.patch.set_facecolor("lightblue")
 
-    ax = shapefile.plot(
-        ax=ax,
-        column="NDVI",
-        cmap=cmap,
-        norm=norm,
-        legend=False,
-        edgecolor="Black",
-        label=shapefile[LEVEL_3_LABEL],
-    )
-
-
-    ax.axis("off")
-
+    fig, ax = plot_NDVI_shapefile_map(shapefile, LEVEL_3_LABEL)
 
     st.pyplot(fig)
 
