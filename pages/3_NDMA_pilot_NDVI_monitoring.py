@@ -113,7 +113,7 @@ jpg_date = st.select_slider(f"Move the slider to view the last 12 weeks of NDVI 
 
 
 selected_jpeg = jpg_files[dates.index(jpg_date)]
-print(selected_jpeg)
+# print(selected_jpeg)
 selected_NDVI = df_NDVI.loc[jpg_date]
 
 
