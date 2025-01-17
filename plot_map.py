@@ -19,11 +19,11 @@ def create_map(dataset,shapefile_path, VCI3M,LEVEL_3_LABEL ):
     Using geopandas the shapefile is read and a new column of VCI3M is
     added onto it. Everything is set to zero apart from the dataset we are
     creating the report for. The shapefile is then plotted based on it's
-    VCI3M. The set_trend function is then called.
+    VCI3M. 
 
     Returns
     -------
-    None.
+    fig,ax.
 
     """
     # print("Creating map...")
