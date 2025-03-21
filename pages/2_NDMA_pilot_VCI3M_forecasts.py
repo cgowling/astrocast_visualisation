@@ -67,14 +67,13 @@ with col[0]:
 
     shapefile = uf.add_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
 
-
-    bounds = [0,0.0001, 1, 10, 20, 35, 50, 100]
+    bounds = [ 1, 10, 20, 35, 50, 100]
 
     #
     colormap = branca.colormap.LinearColormap(
-        # vmin=0,  # shapefile["VCI3M"].quantile(0.0),
-        # vmax=shapefile["VCI3M"].quantile(1),
-        colors=["white","red", "r", "orange", "yellow", "green", "darkgreen"],
+        vmin=0,  # shapefile["VCI3M"].quantile(0.0),
+        vmax=shapefile["VCI3M"].quantile(1),
+        colors=[  "r", "orange", "green", "darkgreen"],
         caption="VCI3M",
     ).to_step(index = bounds)
 

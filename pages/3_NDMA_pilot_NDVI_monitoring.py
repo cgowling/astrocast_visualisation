@@ -32,7 +32,7 @@ def convert_julian_doy_to_datetime(date):
 
 
 def plot_NDVI_shapefile_map(shapefile, LEVEL_3_LABEL):
-    fig, ax = plt.subplots(figsize=(2, 2))
+    fig, ax = plt.subplots(figsize=(3, 3))
     fig.patch.set_facecolor("lightblue")
 
     ax = shapefile.plot(
@@ -42,10 +42,12 @@ def plot_NDVI_shapefile_map(shapefile, LEVEL_3_LABEL):
         norm=norm,
         legend=False,
         edgecolor="Black",
+        linewidth=0.3,
         label=shapefile[LEVEL_3_LABEL],
     )
 
     ax.axis("off")
+    plt.tight_layout()
     return fig, ax
 
 
@@ -102,10 +104,8 @@ filtered_datasets = shapefile_filtered [LEVEL_3_LABEL].tolist()
 
 path_to_pilot_county_jpegs = f"./passage_clusters/VIIRS/Kenya/NDVI_images/{selected_pilot_county}/"
 
-jpg_files = sorted(glob.glob(path_to_pilot_county_jpegs + "*.jpg"))
+jpg_files = sorted(glob.glob(path_to_pilot_county_jpegs + "*.jpeg"))
 dates = [convert_julian_doy_to_datetime(x.split(f"{selected_pilot_county}_")[1][:7]).date().strftime("%Y-%m-%d") for x in jpg_files]
-
-
 
 jpg_date = st.select_slider(f"Move the slider to view the last 12 weeks of NDVI observations for {selected_pilot_county}" , options=dates[-12:], value=dates[-1])
 # print(jpg_date)
@@ -124,7 +124,7 @@ col_ndvi_monitoring  = st.columns(( 1, 1,0.5), gap='medium')
 with col_ndvi_monitoring[0]:
 
     st.write("VIIRS data at 500m resolution")
-    st.image(selected_jpeg, caption="NDVI")
+    st.image(selected_jpeg)#, caption="NDVI"
 
 with col_ndvi_monitoring[1]:
     st.write(f"NDVI aggregated to mean sub-scounty for week ending {jpg_date}")

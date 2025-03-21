@@ -24,7 +24,7 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
         VCI3M_forecast[-11:] + errors,
         lw=3,
         label="Forecast VCI3M uncertainty",
-        color="blue",
+        color="gray",
         alpha=0.45,
         zorder=4,
         interpolate=True,
@@ -55,26 +55,26 @@ def plot_forecasts(dates,VCI3M, dates_forecast,VCI3M_forecast, errors, last_date
     if min_value < 0:
         ax.set_ylim(min_value - 10, 100)
 
-        ax.axhspan(-100, 10, alpha=0.5, color="r")
+        ax.axhspan(-100, 10, alpha=0.5, color="r", label =" Extreme Drought")
     else:
         ax.set_ylim(0, 100)
-        ax.axhspan(0, 10, alpha=0.5, color="r")
+        ax.axhspan(0, 10, alpha=0.5, color="r", label =" Extreme Drought")
 
     if max_value > 100:
         ax.set_ylim(0, max_value + 5)
 
     # Shading the background based on where the VCI3M is
 
-    ax.axhspan(10, 20, alpha=0.5, color="darkorange")
-    ax.axhspan(20, 35, alpha=0.5, color="yellow")
-    ax.axhspan(35, 50, alpha=0.5, color="limegreen")
-    ax.axhspan(50, 300, alpha=0.5, color="darkgreen")
+    ax.axhspan(10, 20, alpha=0.5, color="darkorange", label="Severe Drought")
+    ax.axhspan(20, 35, alpha=0.5, color="yellow", label="Moderate Drought")
+    ax.axhspan(35, 50, alpha=0.5, color="limegreen", label="Normal Conditions")
+    ax.axhspan(50, 300, alpha=0.5, color="darkgreen",  label="Very Good Conditions")
 
     ax.set_title("VCI3M for {} {}".format(dataset, LEVEL_2_NAME), fontsize=20)
 
     # self.ax4.set_title(str(self.dataset) + ' VCI3M',fontsize=20)
 
-    ax.legend()
+    ax.legend(loc="upper left")
     # self.figure.autofmt_xdate()
 
     # use a more precise date string for the x axis locations in the
@@ -101,11 +101,13 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
         # filter_test = shapefile[mask]
         # test_list = filter_test["Adm2Name"].to_list()
         # NDMA_pilot_sub_counties
-        datasets = ['Voi', 'Mwatate', 'Wundanyi', 'Taveta', 'Rabai', 'Kilifi South', 'Kaloleni', 'Magarini', 'Malindi', 'Kilifi North',
-                                   'Ganze', 'Laisamis', 'Moyale', 'North Horr', 'Saku', 'Lafey', 'Mandera North', 'Banissa', 'Mandera West', 'Mandera South',
-                                   'Mandera East', 'Tarbaj', 'Wajir North', 'Wajir South', 'Wajir West', 'Balambala', 'Dujis', 'Ijara', 'Fafi', 'Lagdera', 'Dadaab',
-                                   'Eldas', 'Wajir East', 'Kacheliba', 'Pokot South', 'Sigor', 'Kapenguria', 'Turkana East', 'Turkana South', 'Loima', 'Turkana Central',
-                                   'Turkana West', 'Turkana North', 'Kibwezi East', 'Kibwezi West', 'Makueni', 'Kaiti', 'Kilome', 'Mbooni']
+        datasets = list(hdf_file.keys())
+        print(len(datasets))
+        # datasets = ['Voi', 'Mwatate', 'Wundanyi', 'Taveta', 'Rabai', 'Kilifi South', 'Kaloleni', 'Magarini', 'Malindi', 'Kilifi North',
+        #                            'Ganze', 'Laisamis', 'Moyale', 'North Horr', 'Saku', 'Lafey', 'Mandera North', 'Banissa', 'Mandera West', 'Mandera South',
+        #                            'Mandera East', 'Tarbaj', 'Wajir North', 'Wajir South', 'Wajir West', 'Balambala', 'Dujis', 'Ijara', 'Fafi', 'Lagdera', 'Dadaab',
+        #                            'Eldas', 'Wajir East', 'Kacheliba', 'Pokot South', 'Sigor', 'Kapenguria', 'Turkana East', 'Turkana South', 'Loima', 'Turkana Central',
+        #                            'Turkana West', 'Turkana North', 'Kibwezi East', 'Kibwezi West', 'Makueni', 'Kaiti', 'Kilome', 'Mbooni']
 
         # datasets = ["Eldas", "Kieni", "Kitui Central", "Kitui East", "Kitui Rural", "Kitui South", "Kitui West",
         #                "Laisamis", "Loima", "Mathira", "Moyale", "Mukurweni", "Mwatate", "Mwingi East",
@@ -151,10 +153,15 @@ def load_smoothed_data(DATA_SOURCE, selected_cluster, datasets):
     # smoothed_datasets = list(hdf_file_smoothed_VCI3M.keys())
     df_vci_smoothed = pd.DataFrame()
     df_vci3m_smoothed =  pd.DataFrame()
+
+    for i, dataset in enumerate(datasets):
+        final_VCI_array = np.array(hdf_file_smoothed_VCI3M[datasets[i]], dtype=float)
+
     for i, dataset in enumerate(datasets):
         final_VCI_array = np.array(hdf_file_smoothed_VCI3M[datasets[i]], dtype=float)
 
         df_vci_smoothed[dataset] = final_VCI_array[12:, 1]
+
         df_vci3m_smoothed[dataset] = final_VCI_array[12:, 2]
         if i==0:
             time = final_VCI_array[12:, 0]
@@ -184,7 +191,7 @@ def add_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL,VCI3M, datasets):
 
     shapefile = gpd.read_file(shapefile_path)
 
-    map_VCI3M = np.full(len(shapefile), 0)
+    map_VCI3M = np.full(len(shapefile), np.nan)
 
 
     for i, dataset in enumerate(datasets):
@@ -275,7 +282,7 @@ def create_base_map_passage_clusters():
             # the map might not be displayed
             sim_geo = gpd.GeoSeries(r["geometry"]).simplify(tolerance=0.001)
             geo_j = sim_geo.to_json()
-            geo_j = folium.GeoJson(data=geo_j)# , style_function=lambda x: {"fillColor": colour}
+            geo_j = folium.GeoJson(data=geo_j)
             folium.Popup(r[level_3_label]).add_to(geo_j)
             geo_j.add_to(m)
     return m
@@ -299,7 +306,9 @@ def create_base_map_kenya():
         # the map might not be displayed
         sim_geo = gpd.GeoSeries(r["geometry"]).simplify(tolerance=0.001)
         geo_j = sim_geo.to_json()
-        geo_j = folium.GeoJson(data=geo_j)# , style_function=lambda x: {"fillColor": colour}
+        geo_j = folium.GeoJson(
+            data=geo_j ,
+        )
         folium.Popup(r[level_3_label]).add_to(geo_j)
         geo_j.add_to(m)
     return m
