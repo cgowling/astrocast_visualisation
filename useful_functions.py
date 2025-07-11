@@ -127,6 +127,7 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
     last_observed_VCI3M = {}
     for i, dataset in enumerate(datasets):
         final_subcounty_array = np.array(hdf_file[datasets[i]] , dtype=float)
+
         last_observed_VCI3M[dataset] = final_subcounty_array[-1, 3]
         df[dataset] = final_subcounty_array[12:, 3]
         df_NDVI[dataset] = final_subcounty_array[12:, 1]
@@ -235,6 +236,7 @@ def add_NDVI_to_shapefile(shapefile_path, LEVEL_3_LABEL,NDVI, datasets):
 
 @st.cache_data
 def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
+    print(dataset)
     errors = np.empty(11, dtype=float)
 
     hindcast_dir = os.path.join("passage_clusters",DATA_SOURCE,LEVEL_1_NAME,  f"hindcasts_{LEVEL_1_NAME}.h5")
@@ -245,7 +247,12 @@ def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
     # print(f"Opening Hindcast file {hindcast_dir}")
     hindcast_file = h5.File((hindcast_dir), "r")
     # print(self.dataset)
-    dataset_array = np.array(hindcast_file[dataset], dtype=float)
+    print(hindcast_file.keys())
+    if dataset == "Chereti/Weyib":
+        dataset_array = np.array(hindcast_file['Chereti-Weyib'], dtype=float)
+    else:
+        dataset_array = np.array(hindcast_file[dataset], dtype=float)
+
     dataset_array[dataset_array == 0] = np.nan
     errors[0] = 0
 

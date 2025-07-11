@@ -174,10 +174,16 @@ with col[1]:
 
 
     df_forecasts_T = uf.load_forecasted_VCI3M(DATA_SOURCE, selected_cluster)
-    dates_forecast = list(df_forecasts_T[selected_coulum].index)
-    VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
+    if selected_coulum ==  'Chereti/Weyib':
+        dates_forecast = list(df_forecasts_T['Chereti-Weyib'].index)
+        VCI3M_forecast = list(df_forecasts_T['Chereti-Weyib'].values)
+        historical_smoothed_VCI3M = list(df_vci3m_smoothed['Chereti-Weyib'].values)
+    else :
 
-    historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
+        dates_forecast = list(df_forecasts_T[selected_coulum].index)
+        VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
+
+        historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
     # VCI3M = list(df[selected_coulum].values)
 
     # ________________________________________
@@ -219,7 +225,13 @@ with col_historical[0]:
     with tab1:
         # streamlit line chart
         # st.subheader("Historical weekly VCI3M ", divider='gray')
-        st.line_chart(filtered_df[selected_coulum], x_label="Date", y_label="VCI3M")
+        if selected_coulum == 'Chereti/Weyib':
+            st.line_chart(filtered_df['Chereti-Weyib'], x_label="Date", y_label="VCI3M")
+
+        else:
+            st.line_chart(filtered_df[selected_coulum], x_label="Date", y_label="VCI3M")
+
+
     with tab2:
         # ________________________________________
         # Display VCI3M dataframe
@@ -238,7 +250,10 @@ with col_historical[1]:
     with tab1_2:
 
         # streamlit line chart
-        st.line_chart(filtered_df_NDVI[selected_coulum], x_label="Date", y_label="NDVI")
+        if selected_coulum == 'Chereti/Weyib':
+            st.line_chart(filtered_df_NDVI['Chereti-Weyib'], x_label="Date", y_label="NDVI")
+        else:
+            st.line_chart(filtered_df_NDVI[selected_coulum], x_label="Date", y_label="NDVI")
 
     with tab2_2:
         # st.subheader("Historical weekly NDVI all regions ", divider='gray')

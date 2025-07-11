@@ -116,6 +116,7 @@ with col[0]:
 
     if output['last_active_drawing']:
         selected_coulum = output["last_object_clicked_tooltip"].splitlines()[3].lstrip()
+
         # st.write(selected_coulum)
     else:
         selected_coulum = datasets[0]
@@ -129,14 +130,22 @@ with col[1]:
     # ________________________________________
     # calculate errors from hindcasts for this subcounty
     # ________________________________________
+
     errors = uf.get_error(DATA_SOURCE, region,selected_coulum)
 
 
     df_forecasts_T = uf.load_forecasted_VCI3M(DATA_SOURCE, region)
-    dates_forecast = list(df_forecasts_T[selected_coulum].index)
-    VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
 
-    historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
+    if selected_coulum ==  'Chereti/Weyib':
+        dates_forecast = list(df_forecasts_T['Chereti-Weyib'].index)
+        VCI3M_forecast = list(df_forecasts_T['Chereti-Weyib'].values)
+        historical_smoothed_VCI3M = list(df_vci3m_smoothed['Chereti-Weyib'].values)
+    else :
+
+        dates_forecast = list(df_forecasts_T[selected_coulum].index)
+        VCI3M_forecast = list(df_forecasts_T[selected_coulum].values)
+
+        historical_smoothed_VCI3M = list(df_vci3m_smoothed[selected_coulum].values)
     # VCI3M = list(df[selected_coulum].values)
 
     # ________________________________________
