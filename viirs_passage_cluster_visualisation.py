@@ -96,6 +96,8 @@ else:
 
 st.write("Select a sub county on the map to see VCI3M forecast and historical data for that region  ")
 
+
+
 col = st.columns(( 1, 1), gap='medium')
 
 with col[0]:
@@ -107,6 +109,14 @@ with col[0]:
     m = uf.create_base_map_passage_clusters()
 
     shapefile = uf.add_VCI3M_to_shapefile(shapefile_path, LEVEL_3_LABEL, last_observed_VCI3M, datasets)
+
+    if shapefile_path == "./shapefiles/IGAD_Cluster_123/IGAD_Cluster_3.shp":
+        shapefile = shapefile.drop(columns=['date', 'validOn', "validTo"])
+
+    for column in shapefile.columns:
+        if shapefile[column].apply(lambda v: isinstance(v, (pd.Timestamp, datetime.datetime))).any():
+            print(f"⚠️ Column '{column}' contains Timestamps")
+
 
     bounds = [ 1, 10, 20, 35, 50, 100]
 
@@ -132,6 +142,8 @@ with col[0]:
         """,
         max_width=800,
     )
+
+
 
     g = folium.GeoJson(
         shapefile,
