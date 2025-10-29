@@ -1,11 +1,26 @@
-streamlit
-pandas
-numpy
-matplotlib
-h5py
+# --- Core UI ---
+streamlit==1.38.0
+streamlit-folium==0.22.0
+
+# --- Geospatial stack ---
+folium==0.17.0
+geopandas==1.0.1
+shapely==2.0.4
+fiona==1.9.6
+pyproj==3.6.1
+branca==0.7.2
+
+# --- Data & plotting ---
+pandas==2.2.3
+numpy==1.26.4
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# --- File formats / HDF5 ---
+h5py==3.11.0
+
+# --- Misc utilities ---
+requests==2.32.3
+
 datetime
-seaborn
-geopandas
 openpyxl
-folium
-streamlit_folium
