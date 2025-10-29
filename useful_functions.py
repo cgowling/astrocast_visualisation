@@ -102,7 +102,7 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
         # test_list = filter_test["Adm2Name"].to_list()
         # NDMA_pilot_sub_counties
         datasets = list(hdf_file.keys())
-        print(len(datasets))
+        # print(len(datasets))
         # datasets = ['Voi', 'Mwatate', 'Wundanyi', 'Taveta', 'Rabai', 'Kilifi South', 'Kaloleni', 'Magarini', 'Malindi', 'Kilifi North',
         #                            'Ganze', 'Laisamis', 'Moyale', 'North Horr', 'Saku', 'Lafey', 'Mandera North', 'Banissa', 'Mandera West', 'Mandera South',
         #                            'Mandera East', 'Tarbaj', 'Wajir North', 'Wajir South', 'Wajir West', 'Balambala', 'Dujis', 'Ijara', 'Fafi', 'Lagdera', 'Dadaab',
@@ -141,7 +141,7 @@ def load_observed_data(DATA_SOURCE,selected_cluster):
             df["Date"] = dates
             df = df.set_index("Date")
             df_NDVI["Date"] = dates
-            df_NDVI =  df_NDVI.set_index("Date")
+            df_NDVI = df_NDVI.set_index("Date")
     return datasets, df, df_NDVI, last_observed_VCI3M,  min_date , max_date, dates
 
 
@@ -236,7 +236,7 @@ def add_NDVI_to_shapefile(shapefile_path, LEVEL_3_LABEL,NDVI, datasets):
 
 @st.cache_data
 def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
-    print(dataset)
+    # print(dataset)
     errors = np.empty(11, dtype=float)
 
     hindcast_dir = os.path.join("passage_clusters",DATA_SOURCE,LEVEL_1_NAME,  f"hindcasts_{LEVEL_1_NAME}.h5")
@@ -247,7 +247,7 @@ def get_error(DATA_SOURCE, LEVEL_1_NAME, dataset):
     # print(f"Opening Hindcast file {hindcast_dir}")
     hindcast_file = h5.File((hindcast_dir), "r")
     # print(self.dataset)
-    print(hindcast_file.keys())
+    # print(hindcast_file.keys())
     if dataset == "Chereti/Weyib":
         dataset_array = np.array(hindcast_file['Chereti-Weyib'], dtype=float)
     else:
