@@ -1,16 +1,12 @@
 import streamlit as st
-import streamlit as st
 import time
 import numpy as np
-import useful_functions as uf
 from streamlit_folium import st_folium
 
-import streamlit as st
 import matplotlib.gridspec as gridspec
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 import h5py as h5
 import branca
 import datetime
@@ -85,12 +81,11 @@ st.set_page_config(
 st.header("NDVI monitoring ", divider='gray')
 
 
-datasets, df, df_NDVI, last_observed_VCI3M, min_date, max_date, dates = uf.load_observed_data(DATA_SOURCE,
-                                                                                              region)
+datasets, df, df_NDVI, last_observed_VCI3M, min_date, max_date, _ = uf.load_observed_data(DATA_SOURCE,  region)
 
 NDMA_pilot_counties = ["Garissa", "Kilifi", "Makueni", "Mandera", "Marsabit", "Taita Taveta", "Turkana", "Wajir",
                        "West Pokot"]
-selected_pilot_county = st.selectbox("County NDVI",(NDMA_pilot_counties))
+selected_pilot_county = st.selectbox("County NDVI",NDMA_pilot_counties)
 
 shapefile_path = "shapefiles/KEN_Adm2/KEN_Adm2.shp"
 LEVEL_2_LABEL = "Adm1Name"
@@ -106,8 +101,9 @@ path_to_pilot_county_jpegs = f"./passage_clusters/VIIRS/Kenya/NDVI_images/{selec
 
 jpg_files = sorted(glob.glob(path_to_pilot_county_jpegs + "*.jpeg"))
 dates = [convert_julian_doy_to_datetime(x.split(f"{selected_pilot_county}_")[1][:7]).date().strftime("%Y-%m-%d") for x in jpg_files]
-
+print(dates[-6:])
 jpg_date = st.select_slider(f"Move the slider to view the last 12 weeks of NDVI observations for {selected_pilot_county}" , options=dates[-12:], value=dates[-1])
+print(jpg_date)
 # print(jpg_date)
 # print(df_NDVI.loc[jpg_date])#.loc[jpg_date]
 
