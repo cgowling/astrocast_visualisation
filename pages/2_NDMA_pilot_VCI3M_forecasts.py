@@ -119,7 +119,7 @@ with col[0]:
 
         # st.write(selected_coulum)
     else:
-        selected_coulum = datasets[0]
+        selected_coulum = datasets[1]
 
 with col[1]:
     # ________________________________________
